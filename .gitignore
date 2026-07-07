@@ -1,0 +1,17 @@
+# Environnement Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Secrets - NE JAMAIS committer
+.env
+
+# Base de données locale (si SQLite était encore utilisé)
+*.db
+
+# Fichiers OS
+.DS_Store
+
+# Docker
+postgres_data/
