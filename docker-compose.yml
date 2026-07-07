@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: gateway_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gateway_admin
+      POSTGRES_PASSWORD: changeme123
+      POSTGRES_DB: gateway_db
+    ports:
+      - "5433:5432"          # 5433 côté hôte pour éviter un conflit avec un Postgres déjà installé
+    volumes:
+      - postgres_data:/var/lib/postgresql/data   # les données survivent aux redémarrages
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gateway_admin -d gateway_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
