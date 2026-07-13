@@ -28,7 +28,7 @@ def get_connection():
 
 
 def init_db():
-    """Crée la table devices si elle n'existe pas encore."""
+    """Crée les tables si elles n'existent pas encore."""
     conn = get_connection()
     with conn.cursor() as cur:
         cur.execute("""
@@ -41,6 +41,15 @@ def init_db():
                 confidence REAL,
                 first_seen TIMESTAMPTZ,
                 last_seen TIMESTAMPTZ
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS dns_events (
+                id SERIAL PRIMARY KEY,
+                ip TEXT,
+                domain TEXT,
+                category TEXT,
+                timestamp TIMESTAMPTZ
             )
         """)
     conn.commit()
@@ -75,6 +84,43 @@ def list_devices():
     conn = get_connection()
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
         cur.execute("SELECT * FROM devices ORDER BY last_seen DESC")
+        rows = cur.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def insert_dns_events(events: list[dict]):
+    """
+    Insère une liste d'événements DNS en une seule fois (plus rapide qu'un
+    insert par ligne). Chaque event est un dict : {ip, domain, category, timestamp}.
+    """
+    if not events:
+        return
+    conn = get_connection()
+    with conn.cursor() as cur:
+        psycopg2.extras.execute_values(
+            cur,
+            "INSERT INTO dns_events (ip, domain, category, timestamp) VALUES %s",
+            [(e["ip"], e["domain"], e["category"], e["timestamp"]) for e in events],
+        )
+    conn.commit()
+    conn.close()
+
+
+def usage_stats_by_category():
+    """
+    Retourne, pour chaque (IP, catégorie), le nombre de requêtes DNS observées.
+    C'est une première approximation simple de "temps passé par catégorie"
+    (plus il y a de requêtes, plus l'usage a été long/actif).
+    """
+    conn = get_connection()
+    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        cur.execute("""
+            SELECT ip, category, COUNT(*) AS nb_requetes
+            FROM dns_events
+            GROUP BY ip, category
+            ORDER BY ip, nb_requetes DESC
+        """)
         rows = cur.fetchall()
     conn.close()
     return [dict(r) for r in rows]

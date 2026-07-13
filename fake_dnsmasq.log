@@ -1,0 +1,11 @@
+Jul  7 08:15:02 dnsmasq[1234]: query[A] tiktok.com from 192.168.4.10
+Jul  7 08:15:05 dnsmasq[1234]: query[A] www.tiktok.com from 192.168.4.10
+Jul  7 08:20:11 dnsmasq[1234]: query[A] youtube.com from 192.168.4.10
+Jul  7 09:02:34 dnsmasq[1234]: query[A] khanacademy.org from 192.168.4.14
+Jul  7 09:03:01 dnsmasq[1234]: query[A] duolingo.com from 192.168.4.14
+Jul  7 12:45:00 dnsmasq[1234]: query[A] netflix.com from 192.168.4.13
+Jul  7 20:10:15 dnsmasq[1234]: query[A] battlenet.com from 192.168.4.12
+Jul  7 20:11:02 dnsmasq[1234]: query[A] epicgames.com from 192.168.4.12
+Jul  7 23:47:19 dnsmasq[1234]: query[A] instagram.com from 192.168.4.10
+Jul  7 23:48:03 dnsmasq[1234]: query[A] tiktok.com from 192.168.4.10
+Jul  7 23:50:44 dnsmasq[1234]: query[A] randomsite.xyz from 192.168.4.15
