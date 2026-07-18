@@ -30,6 +30,7 @@ OUI_TABLE = {
     "9CB6D0": "Sony",
     "9803D8": "Nintendo",
     "001B7A": "Nintendo",
+    "F06728": "OPPO",
 }
 
 

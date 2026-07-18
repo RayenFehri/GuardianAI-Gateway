@@ -30,6 +30,9 @@ HOSTNAME_HINTS = {
     "alexa": "Objet IoT",
     "printer": "Imprimante",
     "nas": "NAS",
+    "oppo": "Smartphone",   # ex: "OPPO-A31" (identifié en conditions réelles)
+    "xiaomi": "Smartphone",
+    "redmi": "Smartphone",
 }
 
 # Vendor -> type par défaut si le hostname ne dit rien
@@ -41,6 +44,7 @@ VENDOR_HINTS = {
     "Microsoft": "Console",
     "Nintendo": "Console",
     "Raspberry Pi Foundation": "Raspberry Pi",
+    "OPPO": "Smartphone",
 }
 
 

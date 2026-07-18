@@ -10,10 +10,13 @@ et tout le reste s'adapte automatiquement.
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()  # charge les variables depuis le fichier .env
 
 # ============================================================
 # ENVIRONNEMENT : "dev" (PC Fedora) ou "pi" (Raspberry Pi)
-# Change cette ligne quand tu déploies sur le Pi
+# Défini dans le fichier .env (GATEWAY_ENV=dev ou GATEWAY_ENV=pi)
 # ============================================================
 ENVIRONMENT = os.getenv("GATEWAY_ENV", "dev")
 
@@ -23,9 +26,9 @@ BASE_DIR = Path(__file__).parent
 # CHEMINS DES FICHIERS
 # ============================================================
 if ENVIRONMENT == "pi":
-    # Chemins réels sur OpenWrt
-    LEASES_FILE = Path("/tmp/dhcp.leases")
-    DNS_LOG_FILE = Path("/tmp/log/dnsmasq.log")
+    # Chemins réels sur Raspberry Pi OS (dnsmasq installé via apt)
+    LEASES_FILE = Path("/var/lib/misc/dnsmasq.leases")
+    DNS_LOG_FILE = Path("/var/log/dnsmasq.log")
 else:
     # Fichiers simulés pour le développement sur PC
     LEASES_FILE = BASE_DIR / "fake_dnsmasq.leases"
@@ -46,10 +49,10 @@ DB_CONFIG = {
 # PARAMÈTRES RÉSEAU
 # ============================================================
 # Sous-réseau local du Pi (à adapter selon ta box)
-LAN_SUBNET = os.getenv("LAN_SUBNET", "192.168.1.0/24")
+LAN_SUBNET = os.getenv("LAN_SUBNET", "192.168.50.0/24")
 
-# Interface réseau du Pi (eth0 sur OpenWrt)
-LAN_INTERFACE = os.getenv("LAN_INTERFACE", "eth0")
+# Interface WiFi du Pi en mode Access Point (hostapd + dnsmasq)
+LAN_INTERFACE = os.getenv("LAN_INTERFACE", "uap0")
 
 # ============================================================
 # PARAMÈTRES DES SCRIPTS
