@@ -44,6 +44,7 @@ VENDOR_HINTS = {
     "Microsoft": "Console",
     "Nintendo": "Console",
     "Raspberry Pi Foundation": "Raspberry Pi",
+    "Raspberry Pi Trading Ltd": "Raspberry Pi",  # Pi 4/5 dans la base IEEE
     "OPPO": "Smartphone",
 }
 

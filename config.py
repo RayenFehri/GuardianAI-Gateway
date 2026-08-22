@@ -54,6 +54,9 @@ LAN_SUBNET = os.getenv("LAN_SUBNET", "192.168.50.0/24")
 # Interface WiFi du Pi en mode Access Point (hostapd + dnsmasq)
 LAN_INTERFACE = os.getenv("LAN_INTERFACE", "uap0")
 
+# Interface WAN (connexion Internet du Pi)
+WAN_INTERFACE = os.getenv("WAN_INTERFACE", "wlan0")
+
 # ============================================================
 # PARAMÈTRES DES SCRIPTS
 # ============================================================

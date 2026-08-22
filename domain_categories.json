@@ -1,0 +1,52 @@
+{
+  "reseaux_sociaux": [
+    "tiktok.com", "instagram.com", "cdninstagram.com", "fbcdn.net", "facebook.com", "snapchat.com",
+    "twitter.com", "x.com", "reddit.com", "pinterest.com",
+    "linkedin.com", "tumblr.com", "bereal.com", "discord.com",
+    "whatsapp.com", "telegram.org", "signal.org", "viber.com"
+  ],
+  "streaming_video": [
+    "youtube.com", "netflix.com", "twitch.tv", "akamai.net",
+    "disneyplus.com", "hulu.com", "primevideo.com", "dailymotion.com",
+    "vimeo.com", "peacocktv.com", "paramountplus.com", "crunchyroll.com",
+    "bilibili.com", "youku.com"
+  ],
+  "streaming_audio": [
+    "spotify.com", "deezer.com", "soundcloud.com", "music.apple.com",
+    "tidal.com", "pandora.com", "iheart.com", "audiomack.com",
+    "mixcloud.com", "bandcamp.com"
+  ],
+  "jeux": [
+    "battlenet.com", "ea.com", "roblox.com", "epicgames.com",
+    "steampowered.com", "store.steampowered.com", "minecraft.net",
+    "fortnite.com", "leagueoflegends.com", "valorant.com",
+    "playstation.com", "xbox.com", "nintendo.com",
+    "riotgames.com", "activision.com", "ubisoft.com", "gamespot.com"
+  ],
+  "education": [
+    "khanacademy.org", "coursera.org", "duolingo.com", "wikipedia.org",
+    "edx.org", "udemy.com", "brilliant.org", "codecademy.com",
+    "skillshare.com", "quizlet.com", "scholastic.com", "ted.com",
+    "national-geographic.com", "larousse.fr", "bbc.co.uk"
+  ],
+  "travail": [
+    "office365.com", "google.com", "slack.com", "zoom.us",
+    "microsoft.com", "teams.microsoft.com", "drive.google.com",
+    "docs.google.com", "notion.so", "trello.com", "asana.com",
+    "dropbox.com", "github.com", "gitlab.com", "jira.atlassian.com",
+    "confluence.atlassian.com"
+  ],
+  "ia": [
+    "openai.com", "claude.ai", "gemini.google.com", "copilot.microsoft.com",
+    "bard.google.com", "huggingface.co", "midjourney.com",
+    "perplexity.ai", "mistral.ai", "cohere.com"
+  ],
+  "adulte": [
+    "pornhub.com", "xvideos.com", "xnxx.com", "xhamster.com",
+    "redtube.com", "youporn.com", "brazzers.com"
+  ],
+  "paris_jeux_argent": [
+    "bet365.com", "pokerstars.com", "winamax.fr", "betclic.com",
+    "unibet.com", "bwin.com", "888casino.com", "draftkings.com"
+  ]
+}
