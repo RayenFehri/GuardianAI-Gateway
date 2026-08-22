@@ -1,8 +1,8 @@
 # 🚀 GuardianAI Gateway — Guide de Démonstration
 
 > **Projet :** Passerelle de contrôle parental sur Raspberry Pi  
-> **Architecture :** Pi (hostapd + dnsmasq + iptables) + PostgreSQL + MQTT + Grafana  
-> **Durée estimée de la démo :** 15–20 minutes
+> **Architecture :** Pi (hostapd + dnsmasq + iptables + systemd) + PostgreSQL + MQTT + Grafana  
+> **Durée estimée :** 15–20 minutes
 
 ---
 
@@ -23,10 +23,10 @@
 ```bash
 cd ~/9raya/Projects/gateway_project
 
-# 1. Démarre PostgreSQL + Mosquitto + Grafana
+# Démarre PostgreSQL + Mosquitto + Grafana
 docker compose up -d
 
-# 2. Vérifie que les 3 services tournent
+# Vérifie que les 3 services tournent
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 ```
 
@@ -43,8 +43,8 @@ gateway_postgres     Up X seconds    0.0.0.0:5433->5432/tcp
 ## 🍓 ÉTAPE 1 — Connexion au Raspberry Pi
 
 ```bash
-# Branche le Pi et attends ~30 secondes qu'il démarre
-ssh pi@10.17.245.6
+# Le Pi démarre tout seul en ~45 secondes
+ssh pi@raspberrypi.local
 # Mot de passe : ray+ray000
 ```
 
@@ -52,76 +52,58 @@ ssh pi@10.17.245.6
 
 ## 🔄 ÉTAPE 2 — Synchronisation du code (PC → Pi)
 
-> ⚠️ À faire depuis un **nouveau terminal sur le PC** (pas depuis la session SSH)
+> ⚠️ À faire depuis un **nouveau terminal sur le PC** après chaque modification du code
 
 ```bash
 rsync -av \
   --exclude='venv' --exclude='__pycache__' --exclude='.git' \
   ~/9raya/Projects/gateway_project/ \
-  pi@10.17.245.6:~/gateway_project/
-# Mot de passe : ray+ray000
+  pi@raspberrypi.local:~/gateway_project/
 ```
 
 ---
 
-## 🌐 ÉTAPE 3 — Configuration réseau du Pi
+## 🤖 ÉTAPE 3 — Vérification des services automatiques (Pi)
 
-> À faire **une seule fois** après chaque redémarrage du Pi.
+> ✨ **Nouveauté :** Depuis la v2, le Pi se configure **tout seul** au démarrage.
+> Brancher la prise suffit — aucune commande manuelle nécessaire.
 
 ```bash
-# Sur le Pi (terminal SSH)
-cd ~/gateway_project
+# Sur le Pi (SSH) — vérifie que les 3 services tournent
+sudo systemctl status guardian-network.service guardian-discovery.service guardian-rules.service --no-pager
+```
+
+✅ **Résultat attendu (3 lignes vertes) :**
+```
+guardian-network.service    active (exited)   ← réseau configuré au boot
+guardian-discovery.service  active (running)  ← détecte les appareils en continu
+guardian-rules.service      active (running)  ← applique les blocages en continu
+```
+
+```bash
+# Voir les logs en temps réel
+sudo journalctl -u guardian-discovery.service -f
+# (Ctrl+C pour quitter)
+```
+
+---
+
+## 🔍 ÉTAPE 4 — Découverte automatique des appareils
+
+> Les appareils sont détectés automatiquement dès qu'ils se connectent au Wi-Fi.
+> Le service `guardian-discovery` tourne en fond et scanne toutes les 60 secondes.
+
+**Connecte un téléphone au Wi-Fi `GuardianGateway`**, puis sur le PC :
+
+```bash
+# Vois les appareils détectés en base de données
+cd ~/9raya/Projects/gateway_project
 source venv/bin/activate
-
-# Vérifie les services réseau
-sudo systemctl status hostapd --no-pager | head -4
-sudo systemctl status dnsmasq  --no-pager | head -4
-
-# Active le routage IP (Internet pass-through)
-echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
-
-# Règle NAT : partage la connexion Internet avec les appareils du Wi-Fi
-sudo iptables -t nat -C POSTROUTING -o wlan0 -j MASQUERADE 2>/dev/null || \
-  sudo iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
-
-# Règles FORWARD : autorise le relais AP (uap0) ↔ Internet (wlan0)
-sudo iptables -C FORWARD -i wlan0 -o uap0 -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null || \
-  sudo iptables -I FORWARD 1 -i wlan0 -o uap0 -m state --state RELATED,ESTABLISHED -j ACCEPT
-
-sudo iptables -C FORWARD -i uap0 -o wlan0 -j ACCEPT 2>/dev/null || \
-  sudo iptables -A FORWARD -i uap0 -o wlan0 -j ACCEPT
-
-# Sauvegarde les règles pour les prochains redémarrages
-sudo sh -c "iptables-save > /etc/iptables.rules"
-
-# Vérifie l'ordre des règles (critique !)
-sudo iptables -L FORWARD -v -n --line-numbers
-```
-
-✅ **Ordre correct des règles FORWARD :**
-```
-num   target       in     out    details
-1     ACCEPT       wlan0  uap0   state RELATED,ESTABLISHED  ← réponses Internet
-2     DOCKER-USER  *      *      ...                        ← Docker
-3     DOCKER-FWD   *      *      ...                        ← Docker
-?     DROP guardian uap0  *      MAC xx:xx (blocages)       ← avant ACCEPT !
-?     ACCEPT       uap0   wlan0  tout passe                 ← doit être en dernier
-```
-
----
-
-## 🔍 ÉTAPE 4 — Découverte des appareils
-
-```bash
-# Sur le Pi — connecte un téléphone au WiFi "GuardianGateway" d'abord
-export GATEWAY_ENV=pi
-python3 main_discovery.py
-```
-
-✅ **Résultat attendu :**
-```
-2026-xx-xx XX:XX:XX [INFO] 1 équipement(s) détecté(s).
-MAC: a2:50:d5:8f:0b:04  IP: 192.168.50.58  Hostname: OPPO-A74  Vendor: OPPO  -> Smartphone (90%)
+python3 -c "
+from db import list_devices
+for d in list_devices():
+    print(f\"  {d['mac']}  {d['ip']:<15} {d['hostname']:<20} → {d['device_type']}\")
+"
 ```
 
 ---
@@ -129,23 +111,31 @@ MAC: a2:50:d5:8f:0b:04  IP: 192.168.50.58  Hostname: OPPO-A74  Vendor: OPPO  -> 
 ## 🔒 ÉTAPE 5 — Blocage total d'un appareil (iptables)
 
 > Le blocage le plus fort : coupe **tout** Internet pour l'appareil ciblé.
+> La règle est lue depuis la base de données et appliquée **automatiquement** par `guardian-rules`.
 
 ```bash
-export GATEWAY_ENV=pi
-MAC="a2:50:d5:8f:0b:04"   # ← à remplacer par le MAC détecté à l'étape 4
+# Sur le PC Fedora
+cd ~/9raya/Projects/gateway_project
+source venv/bin/activate
+MAC="a2:50:d5:8f:0b:04"   # ← remplacer par le MAC détecté à l'étape 4
 
-# 1. Ajoute la règle en base de données
-python3 -c "from db import add_rule; add_rule('$MAC', 'block_device')"
+# 1. Crée la règle en base de données
+python3 -c "from db import add_rule; r=add_rule('$MAC', 'block_device'); print(f'Règle #{r} créée')"
+```
 
-# 2. Applique la synchronisation (bloque dans iptables)
-sudo /home/pi/gateway_project/venv/bin/python3 -c "
-import os; os.environ['GATEWAY_ENV']='pi'
-from main_rules import apply_rules
-apply_rules(dry_run=False)
-"
+→ Dans les **60 secondes**, le service `guardian-rules` détecte la nouvelle règle et bloque le téléphone automatiquement.
 
-# 3. Vérifie que la règle est au BON endroit (avant la règle ACCEPT)
+```bash
+# Vérifie que la règle iptables est bien en place (position 1 = prioritaire)
+# Sur le Pi (SSH) :
 sudo iptables -L FORWARD -v -n --line-numbers | grep -E "guardian|ACCEPT.*uap0"
+```
+
+✅ **Résultat attendu :**
+```
+1   DROP   MAC a2:50:d5:8f:0b:04  /* guardian_gateway_rule */   ← en position 1
+2   ACCEPT wlan0 → uap0   state RELATED,ESTABLISHED
+5   ACCEPT uap0 → wlan0
 ```
 
 → Sur le téléphone : **Internet totalement coupé** ❌
@@ -154,32 +144,27 @@ sudo iptables -L FORWARD -v -n --line-numbers | grep -E "guardian|ACCEPT.*uap0"
 # Déblocage : désactive la règle en base
 python3 -c "
 from db import get_connection
-c = get_connection(); cur = c.cursor()
-cur.execute(\"UPDATE rules SET active=FALSE WHERE mac='$MAC' AND rule_type='block_device'\")
+c = get_connection()
+cur = c.cursor()
+cur.execute(\"UPDATE rules SET active=FALSE WHERE mac='$MAC'\")
 c.commit()
-"
-
-# Resynchronise (retire le blocage d'iptables)
-sudo /home/pi/gateway_project/venv/bin/python3 -c "
-import os; os.environ['GATEWAY_ENV']='pi'
-from main_rules import apply_rules
-apply_rules(dry_run=False)
+print('Règle désactivée')
 "
 ```
 
-→ Sur le téléphone : **Internet de retour** ✅
+→ Dans les 60 secondes, le téléphone retrouve Internet automatiquement ✅
 
 ---
 
-## ⏰ ÉTAPE 6 — Blocage horaire (schedule)
-
-> Bloque automatiquement l'appareil dans une plage horaire donnée.
+## ⏰ ÉTAPE 6 — Blocage horaire automatique (schedule)
 
 ```bash
-export GATEWAY_ENV=pi
+# Sur le PC Fedora
+cd ~/9raya/Projects/gateway_project
+source venv/bin/activate
 MAC="a2:50:d5:8f:0b:04"
 
-# Crée une règle "bloqué dans les 10 prochaines minutes"
+# Bloque pendant les 10 prochaines minutes
 python3 -c "
 from db import add_rule
 from datetime import datetime, timedelta
@@ -187,85 +172,54 @@ now = datetime.now()
 start = (now - timedelta(minutes=1)).strftime('%H:%M')
 end   = (now + timedelta(minutes=10)).strftime('%H:%M')
 rid = add_rule('$MAC', 'schedule', start_time=start, end_time=end)
-print(f'Règle #{rid} créée — blocage de {start} à {end}')
-"
-
-# Applique
-sudo /home/pi/gateway_project/venv/bin/python3 -c "
-import os; os.environ['GATEWAY_ENV']='pi'
-from main_rules import apply_rules
-apply_rules(dry_run=False)
+print(f'Règle #{rid} — blocage de {start} à {end}')
 "
 ```
 
-→ L'appareil est bloqué pendant 10 minutes, puis se débloque tout seul au prochain cycle. ✅
+→ Le téléphone est bloqué automatiquement pendant 10 minutes, puis débloqué tout seul. ✅
 
 ---
 
 ## 🚫 ÉTAPE 7 — Blocage de sites par catégorie (dnsmasq DNS)
 
-> Bloque des catégories entières de sites web (réseaux sociaux, jeux, etc.)  
-> ⚠️ **Pour tester dans un navigateur web** (Chrome/Safari) — les apps mobiles peuvent avoir un cache DNS.
-
 ```bash
-export GATEWAY_ENV=pi
+# Sur le PC Fedora
+cd ~/9raya/Projects/gateway_project
+source venv/bin/activate
 
-# 1. Ajoute la règle de blocage de catégorie en base
-python3 -c "from db import add_rule; add_rule(None, 'block_category', 'reseaux_sociaux')"
-
-# 2. Applique la synchronisation (écrit dans dnsmasq + redémarre le service)
-sudo /home/pi/gateway_project/venv/bin/python3 -c "
-import os; os.environ['GATEWAY_ENV']='pi'
-from main_rules import apply_rules
-apply_rules(dry_run=False)
-"
-
-# 3. Vérifie le fichier généré
-cat /etc/dnsmasq.d/guardian_blocks.conf | head -10
-
-# 4. Teste localement que le DNS retourne 0.0.0.0
-host tiktok.com 127.0.0.1
-host instagram.com 127.0.0.1
+# Bloque tous les réseaux sociaux
+python3 -c "from db import add_rule; r=add_rule(None, 'block_category', 'reseaux_sociaux'); print(f'Règle #{r} créée')"
 ```
 
-→ Dans le navigateur du téléphone : **tiktok.com → ❌ bloqué**, **google.com → ✅ accessible**
+→ Dans les 60 secondes, dnsmasq est reconfiguré automatiquement.
 
 ```bash
-# Déblocage (désactive la règle)
-python3 -c "
-from db import get_connection
-c = get_connection(); cur = c.cursor()
-cur.execute(\"UPDATE rules SET active=FALSE WHERE rule_type='block_category'\")
-c.commit()
-"
+# Vérifie le fichier de blocage généré sur le Pi :
+cat /etc/dnsmasq.d/guardian_blocks.conf | head -5
 
-# Resynchronise (supprime le fichier dnsmasq + redémarre)
-sudo /home/pi/gateway_project/venv/bin/python3 -c "
-import os; os.environ['GATEWAY_ENV']='pi'
-from main_rules import apply_rules
-apply_rules(dry_run=False)
-"
+# Teste localement :
+host tiktok.com 127.0.0.1     # → doit retourner 0.0.0.0
+host google.com 127.0.0.1     # → doit retourner une vraie IP
 ```
 
-**Catégories disponibles :** `reseaux_sociaux`, `streaming_video`, `streaming_audio`, `jeux`, `education`, `travail`, `ia`, `adulte`, `paris_jeux_argent`
+**Catégories disponibles :** `reseaux_sociaux`, `streaming_video`, `streaming_audio`, `jeux`, `education`, `adulte`, `ia`, `travail`, `paris_jeux_argent`
 
 ---
 
-## 📡 ÉTAPE 8 — Monitoring MQTT temps réel (PC Fedora)
+## 📡 ÉTAPE 8 — Monitoring MQTT temps réel
 
 ```bash
-# Terminal 1 — écoute tous les événements en temps réel
+# Terminal 1 (PC) — écoute tous les événements
 docker exec gateway_mosquitto mosquitto_sub -t "guardian/#" -v
 
-# Terminal 2 — génère des événements (lance la découverte)
-cd ~/9raya/Projects/gateway_project
-source venv/bin/activate
+# Terminal 2 (PC) — déclenche un événement
+cd ~/9raya/Projects/gateway_project && source venv/bin/activate
 python3 main_discovery.py
 ```
 
-✅ **Messages JSON affichés en temps réel dans Terminal 1 :**
+✅ **Messages JSON en temps réel :**
 ```json
-guardian/devices {"mac": "a2:50:...", "ip": "192.168.50.58", "vendor": "OPPO", ...}
+guardian/devices {"mac": "a2:50:...", "device_type": "Smartphone", ...}
 guardian/rules   {"rule_id": 4, "action": "block", "mac": "a2:50:...", ...}
 ```
 
@@ -273,86 +227,59 @@ guardian/rules   {"rule_id": 4, "action": "block", "mac": "a2:50:...", ...}
 
 ## 📊 ÉTAPE 9 — Dashboard Grafana
 
-```
-URL      : http://localhost:3000
-Login    : admin
-Password : guardian123
-```
+**URL :** http://localhost:3000 — Login : `admin` / `guardian123`
 
-**Panneau 1 — Appareils connectés (Table)**
-```sql
-SELECT mac, ip, hostname, vendor, device_type,
-       to_char(last_seen, 'HH24:MI:SS') AS last_seen
-FROM devices ORDER BY last_seen DESC
-```
+**Requêtes SQL pour les panneaux :**
 
-**Panneau 2 — Types d'appareils (Pie chart)**
 ```sql
-SELECT device_type AS "Type", COUNT(*) AS "Nombre"
-FROM devices GROUP BY device_type ORDER BY "Nombre" DESC
-```
+-- Panneau 1 : Appareils connectés
+SELECT mac, ip, hostname, device_type,
+       to_char(last_seen, 'DD/MM HH24:MI') AS last_seen
+FROM devices ORDER BY last_seen DESC;
 
-**Panneau 3 — Règles actives (Table)**
-```sql
-SELECT id, rule_type, COALESCE(mac, '(tous)') AS mac,
+-- Panneau 2 : Règles actives
+SELECT id, rule_type,
+       COALESCE(mac, '(tous)') AS mac,
        COALESCE(target, '—') AS cible,
        to_char(created_at, 'DD/MM HH24:MI') AS créée_le
-FROM rules WHERE active = TRUE ORDER BY created_at DESC
-```
+FROM rules WHERE active = TRUE ORDER BY created_at DESC;
 
-**Panneau 4 — Top domaines consultés (Bar chart)**
-```sql
+-- Panneau 3 : Top domaines consultés
 SELECT domain, COUNT(*) AS nb_requetes
-FROM dns_events GROUP BY domain ORDER BY nb_requetes DESC LIMIT 15
+FROM dns_events GROUP BY domain
+ORDER BY nb_requetes DESC LIMIT 15;
 ```
 
 ---
 
-## 🔎 ÉTAPE 10 — Vérifications & Diagnostic
+## 🔎 ÉTAPE 10 — Diagnostic complet du système
 
 ```bash
-# Sur le Pi — état complet du système
-echo "=== IP Forward ==="
-cat /proc/sys/net/ipv4/ip_forward
+# Sur le Pi (SSH)
+echo "=== Services systemd ===" && \
+sudo systemctl is-active guardian-network guardian-discovery guardian-rules
 
-echo "=== Règles FORWARD ==="
+echo "=== IP Forward ===" && cat /proc/sys/net/ipv4/ip_forward
+
+echo "=== Règles FORWARD ===" && \
 sudo iptables -L FORWARD -v -n --line-numbers
 
-echo "=== NAT ==="
-sudo iptables -t nat -L POSTROUTING -v -n
-
-echo "=== DHCP Leases ==="
-cat /var/lib/misc/dnsmasq.leases
-
-echo "=== DNS Blocage ==="
+echo "=== DNS Blocage ===" && \
 cat /etc/dnsmasq.d/guardian_blocks.conf 2>/dev/null || echo "Aucun blocage DNS actif"
 
-echo "=== Base de données ==="
-python3 -c "
-from db import list_devices, list_rules
-print('Appareils:')
-for d in list_devices(): print(' ', d['mac'], d['ip'], d['hostname'])
-print('Règles actives:')
-for r in list_rules(active_only=True): print(' ', r['id'], r['rule_type'], r['mac'], r['target'])
-"
+echo "=== DHCP Leases ===" && cat /var/lib/misc/dnsmasq.leases
 ```
 
 ---
 
 ## 🧹 ÉTAPE 11 — Nettoyage des règles iptables (si besoin)
 
-> À utiliser si les règles sont dans le mauvais ordre ou dupliquées.
-
 ```bash
-# Sur le Pi — retire toutes nos règles guardian (sans toucher aux règles Docker/NAT)
+# Sur le Pi — retire toutes nos règles guardian proprement
 sudo iptables-save | grep -v "guardian_gateway_rule" | sudo iptables-restore
 
-# Puis relance la synchronisation propre
-sudo /home/pi/gateway_project/venv/bin/python3 -c "
-import os; os.environ['GATEWAY_ENV']='pi'
-from main_rules import apply_rules
-apply_rules(dry_run=False)
-"
+# Relance la synchronisation
+sudo systemctl restart guardian-rules.service
 ```
 
 ---
@@ -360,11 +287,10 @@ apply_rules(dry_run=False)
 ## 🛑 ÉTAPE 12 — Arrêt propre
 
 ```bash
-# Sur le Pi — éteint proprement (évite la corruption de la carte SD)
+# Sur le Pi
 sudo shutdown -h now
 
-# Sur le PC — arrête les conteneurs Docker
-cd ~/9raya/Projects/gateway_project
+# Sur le PC
 docker compose down
 ```
 
@@ -374,8 +300,33 @@ docker compose down
 
 | Problème | Vérification | Solution |
 |---|---|---|
-| Téléphone sans Internet | `sudo iptables -t nat -L POSTROUTING -v -n` | Ajouter la règle MASQUERADE (Étape 3) |
-| Blocage MAC inefficace | `sudo iptables -L FORWARD -v -n --line-numbers` | La règle DROP doit être AVANT ACCEPT |
-| dnsmasq ne démarre pas | `sudo systemctl status dnsmasq` | `sudo systemctl restart dnsmasq` |
-| Grafana sans données | Vérifier la datasource PostgreSQL | Port `5433`, pas `5432` |
-| MQTT ne reçoit rien | `docker ps` | `docker compose up -d` |
+| Services pas démarrés | `sudo systemctl status guardian-*` | `sudo systemctl start guardian-network guardian-discovery guardian-rules` |
+| Téléphone sans Internet | `sudo iptables -t nat -L POSTROUTING -v -n` | Vérifier la règle MASQUERADE |
+| Blocage MAC inefficace | `sudo iptables -L FORWARD --line-numbers` | La règle DROP doit être en **position 1** |
+| Erreur connexion DB | `sudo journalctl -u guardian-rules -n 10` | Vérifier `.env` → `DB_HOST=<IP du PC>` |
+| Grafana sans données | Datasource PostgreSQL | Port `5433`, pas `5432` |
+| Wi-Fi invisible | `ip a \| grep uap0` | `sudo systemctl restart guardian-network` |
+
+---
+
+## 🏗️ Architecture du système
+
+```
+PC Fedora                          Raspberry Pi
+┌─────────────────────┐            ┌─────────────────────────────┐
+│  Docker             │            │  systemd (auto au boot)     │
+│  ┌───────────────┐  │  TCP:5433  │  ┌─────────────────────┐   │
+│  │  PostgreSQL   │◄─┼────────────┤  │ guardian-network    │   │
+│  └───────────────┘  │            │  │  → uap0 + NAT       │   │
+│  ┌───────────────┐  │            │  ├─────────────────────┤   │
+│  │  Mosquitto    │◄─┼────────────┤  │ guardian-discovery  │   │
+│  │  MQTT broker  │  │  TCP:1883  │  │  → détecte appareils│   │
+│  └───────────────┘  │            │  ├─────────────────────┤   │
+│  ┌───────────────┐  │            │  │ guardian-rules      │   │
+│  │  Grafana      │  │            │  │  → iptables + DNS   │   │
+│  └───────────────┘  │            │  └─────────────────────┘   │
+└─────────────────────┘            │                             │
+                                   │  Réseau Wi-Fi "GuardianGW" │
+                                   │  📱 Téléphone enfant       │
+                                   └─────────────────────────────┘
+```

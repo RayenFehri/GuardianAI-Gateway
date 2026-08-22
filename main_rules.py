@@ -23,6 +23,7 @@ import logging.handlers
 from db import init_db, list_rules
 from rule_engine import block_device, unblock_device, should_be_blocked
 from mqtt_publisher import publish_rule
+from config import POLL_INTERVAL
 
 
 # ============================================================
@@ -111,7 +112,20 @@ def apply_rules(dry_run: bool = False):
 
 
 if __name__ == "__main__":
+    import time
     dry_run_mode = "--dry-run" in sys.argv
+    daemon_mode  = "--daemon"  in sys.argv
+
     if dry_run_mode:
         logger.info("=== Mode DRY-RUN : aucune commande ne sera exécutée ===")
-    apply_rules(dry_run=dry_run_mode)
+
+    if daemon_mode:
+        logger.info("=== Mode DAEMON — synchronisation toutes les %ds ===", POLL_INTERVAL)
+        while True:
+            try:
+                apply_rules(dry_run=dry_run_mode)
+            except Exception as e:
+                logger.error("Erreur pendant apply_rules : %s", e)
+            time.sleep(POLL_INTERVAL)
+    else:
+        apply_rules(dry_run=dry_run_mode)

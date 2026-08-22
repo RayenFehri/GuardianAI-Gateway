@@ -1,0 +1,14 @@
+[Unit]
+Description=GuardianAI — Configuration réseau (uap0 + NAT)
+After=network.target hostapd.service
+Wants=hostapd.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/home/pi/gateway_project/systemd/setup_network.sh
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

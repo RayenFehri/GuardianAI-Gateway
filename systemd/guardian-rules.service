@@ -1,0 +1,18 @@
+[Unit]
+Description=GuardianAI — Synchronisation des règles parentales (daemon)
+After=network.target guardian-network.service
+Requires=guardian-network.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/pi/gateway_project
+Environment=GATEWAY_ENV=pi
+ExecStart=/home/pi/gateway_project/venv/bin/python3 /home/pi/gateway_project/main_rules.py --daemon
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
