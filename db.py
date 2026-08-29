@@ -67,6 +67,16 @@ def init_db():
                     created_at TIMESTAMPTZ DEFAULT NOW()
                 )
             """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS ai_anomalies (
+                    id SERIAL PRIMARY KEY,
+                    mac TEXT,
+                    anomaly_type TEXT NOT NULL,
+                    severity TEXT NOT NULL,
+                    description TEXT,
+                    detected_at TIMESTAMPTZ DEFAULT NOW()
+                )
+            """)
         conn.commit()
         _log.getLogger(__name__).debug(
             "DB prête sur %s:%s/%s", DB_CONFIG['host'], DB_CONFIG['port'], DB_CONFIG['dbname']
@@ -198,6 +208,55 @@ def delete_rule(rule_id: int):
         with conn.cursor() as cur:
             cur.execute("DELETE FROM rules WHERE id = %s", (rule_id,))
         conn.commit()
+    finally:
+        conn.close()
+
+
+# ════════════════════════════════════════════════════════════
+# Fonctions IA (table ai_anomalies)
+# ════════════════════════════════════════════════════════════
+
+def insert_anomaly(anomaly: dict):
+    """Insère une anomalie détectée par l'IA."""
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO ai_anomalies (mac, anomaly_type, severity, description)
+                VALUES (%s, %s, %s, %s)
+            """, (anomaly.get("mac"), anomaly["anomaly_type"],
+                  anomaly["severity"], anomaly["description"]))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def is_anomaly_duplicate(mac: str, anomaly_type: str, hours_back: int = 6) -> bool:
+    """Vérifie si une anomalie identique a déjà été signalée récemment."""
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT COUNT(*) FROM ai_anomalies
+                WHERE anomaly_type = %s
+                  AND (mac = %s OR (mac IS NULL AND %s IS NULL))
+                  AND detected_at > NOW() - INTERVAL '%s hours'
+            """, (anomaly_type, mac, mac, hours_back))
+            return cur.fetchone()[0] > 0
+    finally:
+        conn.close()
+
+
+def list_anomalies(limit: int = 20):
+    """Liste les dernières anomalies détectées."""
+    conn = get_connection()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("""
+                SELECT * FROM ai_anomalies
+                ORDER BY detected_at DESC LIMIT %s
+            """, (limit,))
+            return [dict(r) for r in cur.fetchall()]
     finally:
         conn.close()
 

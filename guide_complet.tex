@@ -1,0 +1,308 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{geometry}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, urlcolor=blue, linkcolor=black, citecolor=black}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\setlength{\headheight}{14pt}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{booktabs}
+\usepackage{tcolorbox}
+\usepackage{fontawesome5}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, fit, backgrounds}
+
+% ==============================
+% MISE EN PAGE ET COULEURS
+% ==============================
+\geometry{left=2.2cm, right=2.2cm, top=2.2cm, bottom=2.2cm}
+\setstretch{1.05}
+\setlist[itemize]{itemsep=2pt, topsep=2pt, parsep=0pt}
+
+\definecolor{codeblue}{rgb}{0.13,0.40,0.72}
+\definecolor{codegreen}{rgb}{0.10,0.55,0.10}
+\definecolor{codeorange}{rgb}{0.80,0.40,0.00}
+\definecolor{backgray}{rgb}{0.96,0.96,0.98}
+\definecolor{blueTN}{RGB}{0,75,150}
+\definecolor{lightblue}{RGB}{220,235,250}
+\definecolor{lightgreen}{RGB}{225,245,225}
+\definecolor{lightyellow}{RGB}{255,245,220}
+\definecolor{lightred}{RGB}{252,232,232}
+\definecolor{purpleTN}{RGB}{95,55,140}
+
+\tcbuselibrary{skins,breakable}
+
+\newtcolorbox{infocadre}[1][]{
+  colback=lightblue!60, colframe=blueTN, fonttitle=\bfseries,
+  title={\faInfoCircle\ #1}, arc=4pt, boxrule=0.8pt, left=6pt, right=6pt, top=4pt, bottom=4pt, breakable
+}
+\newtcolorbox{stepcadre}[1]{
+  colback=lightgreen!50, colframe=codegreen, fonttitle=\bfseries,
+  title={\faTerminal\ #1}, arc=3pt, boxrule=0.7pt,
+  left=6pt, right=6pt, top=3pt, bottom=3pt, breakable
+}
+\newtcolorbox{probcadre}[1]{
+  colback=lightred!60, colframe=red!60!black, fonttitle=\bfseries,
+  title={\faExclamationTriangle\ #1}, arc=3pt, boxrule=0.7pt,
+  left=6pt, right=6pt, top=3pt, bottom=3pt, breakable
+}
+\newtcolorbox{choixcadre}[1]{
+  colback=lightyellow!70, colframe=codeorange, fonttitle=\bfseries,
+  title={\faLightbulb\ #1}, arc=3pt, boxrule=0.7pt,
+  left=6pt, right=6pt, top=3pt, bottom=3pt, breakable
+}
+
+\lstdefinelanguage{BashShell}{
+  keywords={python3, cd, source, docker, compose, up, ps, ssh, rsync, sudo, systemctl, journalctl, iptables, grep, host, cat, mosquitto_sub, echo},
+  keywordstyle=\color{codeblue}\bfseries, sensitive=true,
+  comment=[l]{\#}, commentstyle=\color{codegreen}\itshape,
+  stringstyle=\color{codeorange}, morestring=[b]",
+}
+\lstset{
+  basicstyle=\scriptsize\ttfamily, keywordstyle=\color{codeblue}\bfseries,
+  commentstyle=\color{codegreen}\itshape, stringstyle=\color{codeorange},
+  numbers=none, backgroundcolor=\color{backgray}, frame=single,
+  rulecolor=\color{blueTN!30}, breaklines=true, breakatwhitespace=true,
+  tabsize=2, showstringspaces=false, xleftmargin=6pt, xrightmargin=4pt,
+  aboveskip=4pt, belowskip=3pt,
+}
+
+% ==============================
+% EN-TÊTES ET TITRES
+% ==============================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\bfseries\color{blueTN} AI Smart Parental Gateway}
+\fancyhead[R]{\small Compte Rendu \& Guide Démo}
+\fancyfoot[C]{\textcolor{blueTN}{\thepage}}
+\renewcommand{\headrulewidth}{0.6pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+\titleformat{\section}{\Large\bfseries\color{blueTN}}{\thesection}{0.6em}{}[\color{blueTN}\titlerule]
+\titlespacing*{\section}{0pt}{12pt}{5pt}
+\titleformat{\subsection}{\large\bfseries\color{codeblue}}{\thesubsection}{0.6em}{}
+
+\begin{document}
+
+% ==============================
+% PAGE DE GARDE
+% ==============================
+\thispagestyle{empty}
+\begin{center}
+\vspace*{1.5cm}
+\begin{tcolorbox}[
+  colback=lightblue!35, colframe=blueTN, arc=6pt, boxrule=1.2pt,
+  width=0.9\textwidth, halign=center, valign=center,
+  top=16pt, bottom=16pt, left=10pt, right=10pt
+]
+{\fontsize{20pt}{24pt}\selectfont\textbf{\faNetworkWired\ GuardianAI Gateway}}\\[10pt]
+{\large\textit{Rapport de Projet \& Guide de Démonstration Officiel}}
+\end{tcolorbox}
+\vspace{1cm}
+{\Large\textbf{Projet de Fin d'Année}}\\[0.5cm]
+{\large Réalisé par : \textbf{Rayen FEHRI}}\\
+{\large Encadrante : \textbf{Mme Zaineb KAMMOUN}}\\
+\vspace{0.5cm}
+{\large Institut Supérieur d'Informatique}\\
+\vspace{1.5cm}
+
+\begin{choixcadre}{Aperçu du Système}
+\textbf{Architecture :} Raspberry Pi (hostapd + dnsmasq + iptables + systemd) + PostgreSQL + MQTT + Grafana + Intelligence Artificielle (Isolation Forest \& Mistral AI).\\
+Ce document fusionne le compte rendu d'architecture et le script étape par étape de la démonstration technique.
+\end{choixcadre}
+
+\end{center}
+\newpage
+
+\tableofcontents
+\newpage
+
+% ==============================
+% SECTION 1 : THEORIE (Compte Rendu 2)
+% ==============================
+\section{Partie I : Architecture et Moteur de Règles}
+
+L'objectif de cette passerelle est d'appliquer dynamiquement des politiques de restriction réseau. L'orchestrateur \texttt{main\_rules.py} synchronise l'état désiré (base de données) avec l'état réel (pare-feu et résolveur DNS).
+
+\subsection{Modèle de Données (PostgreSQL)}
+Une table dédiée centralise l'ensemble des règles de contrôle.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{|l|l|X|}
+\hline
+\rowcolor{lightblue}\multicolumn{3}{|c|}{\textbf{Table \texttt{rules} — Politiques de contrôle parental}} \\ \hline
+\rowcolor{lightblue!40}\textbf{Colonne} & \textbf{Type} & \textbf{Rôle} \\ \hline
+\texttt{id} & SERIAL (PK) & Identifiant unique de la règle \\ \hline
+\texttt{mac} & VARCHAR & Adresse MAC ciblée (NULL = tous) \\ \hline
+\texttt{rule\_type} & VARCHAR & \texttt{block\_device}, \texttt{schedule}, \texttt{block\_category} \\ \hline
+\texttt{active} & BOOLEAN & État d'activation (\texttt{TRUE}/\texttt{FALSE}) \\ \hline
+\end{tabularx}
+\end{center}
+
+\subsection{Blocage Réseau (iptables)}
+L'interdiction repose sur le blocage des trames au niveau MAC.
+\begin{itemize}
+    \item \textbf{Ciblage MAC :} Règle visant la chaîne \texttt{FORWARD}.
+    \item \textbf{Idempotence :} Vérification via \texttt{iptables -C} avant ajout.
+    \item \textbf{Plages horaires :} Gestion intelligente du chevauchement de minuit.
+\end{itemize}
+
+\subsection{Filtrage DNS Catégoriel (dnsmasq)}
+\begin{itemize}
+    \item \textbf{Mappage JSON :} Association de domaines à des catégories (Réseaux sociaux, Jeux, etc.).
+    \item \textbf{Poisoning local :} Redirection via \texttt{address=/domaine.com/0.0.0.0}.
+    \item \textbf{Redémarrage intelligent :} Comparaison MD5 avant de recharger le service DNS.
+\end{itemize}
+
+\section{Partie II : Intelligence Artificielle}
+
+L'architecture IA est \textbf{hybride} et se divise en deux volets :
+
+\subsection{Détection d'Anomalies (Règles + Machine Learning)}
+L'orchestrateur IA (\texttt{main\_ai.py}) analyse l'historique DNS :
+\begin{itemize}
+    \item \textbf{Détecteurs Déterministes :} Alertes immédiates sur les accès nocturnes ou les catégories sensibles (ex: Paris sportifs).
+    \item \textbf{Isolation Forest :} Modèle non supervisé (via \texttt{scikit-learn}) qui apprend le comportement moyen de l'appareil (volume, horaires, répartition) et signale les écarts inattendus.
+\end{itemize}
+
+\subsection{Génération de Rapports (Mistral AI)}
+L'API LLM de \textbf{Mistral AI} traduit ces données techniques pour le parent :
+\begin{enumerate}
+    \item \textbf{Agrégation} des requêtes et anomalies sur N jours.
+    \item \textbf{Génération} d'un rapport avec profilage du temps d'écran.
+    \item \textbf{Proactivité :} L'IA émet des suggestions directes prêtes à l'emploi (ex: \textit{"Bloquer les réseaux sociaux de 22h à 7h pour l'adolescent"}).
+\end{enumerate}
+
+\newpage
+
+% ==============================
+% SECTION 2 : PRATIQUE (Demo Commands)
+% ==============================
+\section{Partie III : Guide de Démonstration Pas-à-Pas}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{|l|l|X|}
+\hline
+\rowcolor{blueTN}\multicolumn{3}{|c|}{\textcolor{white}{\textbf{Tableau de bord de l'infrastructure}}} \\ \hline
+\rowcolor{lightblue!40}\textbf{Service} & \textbf{Adresse / Accès} & \textbf{Identifiants} \\ \hline
+Raspberry Pi (SSH) & \texttt{ssh pi@raspberrypi.local} & \texttt{pi} / \texttt{ray+ray000} \\ \hline
+Grafana & \texttt{http://localhost:3000} & \texttt{admin} / \texttt{guardian123} \\ \hline
+PostgreSQL & \texttt{localhost:5433} & \texttt{gateway\_admin} / \texttt{changeme123} \\ \hline
+MQTT Broker & \texttt{localhost:1883} & Anonyme \\ \hline
+WiFi du Pi & SSID : \texttt{GuardianGateway} & -- \\ \hline
+\end{tabularx}
+\end{center}
+
+\subsection{Étape 0 — Démarrage (PC Fedora)}
+\begin{stepcadre}{Lancement des conteneurs}
+\begin{lstlisting}[language=BashShell]
+cd ~/9raya/Projects/gateway_project
+docker compose up -d
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+\end{lstlisting}
+\end{stepcadre}
+
+\subsection{Étape 1 — Résilience (Raspberry Pi)}
+Le routeur intelligent s'auto-configure au démarrage via \texttt{systemd}.
+\begin{stepcadre}{Vérification des services autonomes}
+\begin{lstlisting}[language=BashShell]
+ssh pi@raspberrypi.local
+sudo systemctl status guardian-network guardian-discovery guardian-rules --no-pager
+\end{lstlisting}
+\end{stepcadre}
+
+\subsection{Étape 2 — Blocages (Total et Horaire)}
+Via l'ordinateur, nous modifions directement la base de données. Le Raspberry Pi détecte le changement et applique la règle au réseau instantanément.
+\begin{stepcadre}{Blocage MAC et Horaire (iptables)}
+\begin{lstlisting}[language=BashShell]
+cd ~/9raya/Projects/gateway_project
+source venv/bin/activate
+MAC="a2:50:d5:8f:0b:04"
+
+# Blocage total immédiat :
+python3 -c "from db import add_rule; add_rule('$MAC', 'block_device')"
+
+# Blocage planifié (horaire) :
+python3 -c "from db import add_rule; add_rule('$MAC', 'schedule', '22:00', '07:00')"
+\end{lstlisting}
+\end{stepcadre}
+
+\subsection{Étape 3 — Blocage DNS Catégoriel}
+\begin{stepcadre}{Blocage des Réseaux Sociaux}
+\begin{lstlisting}[language=BashShell]
+python3 -c "from db import add_rule; add_rule(None, 'block_category', 'reseaux_sociaux')"
+\end{lstlisting}
+\end{stepcadre}
+
+\begin{infocadre}[Vérification DNS]
+Un test local sur le Pi via \texttt{host tiktok.com 127.0.0.1} renvoie désormais l'IP \texttt{0.0.0.0}, prouvant l'efficacité du blocage, alors que \texttt{google.com} reste accessible.
+\end{infocadre}
+
+\newpage
+\subsection{Étape 4 — Démonstration de l'IA (Injection et Analyse)}
+Afin de valider le Machine Learning et la génération de rapport LLM, un trafic familial réaliste est simulé sur 7 jours.
+\begin{stepcadre}{Pipeline IA Complet}
+\begin{lstlisting}[language=BashShell]
+# 1. Injection des données de test
+python3 inject_test_data.py
+
+# 2. Lancement des détecteurs (SQL + Isolation Forest)
+python3 main_ai.py
+
+# 3. Lancement de la génération du rapport via Mistral AI
+python3 main_ai.py --report --days 7
+\end{lstlisting}
+\end{stepcadre}
+
+\begin{itemize}
+    \item \textbf{Résultat attendu 1 :} Le modèle \textit{Isolation Forest} et les règles SQL détectent l'usage nocturne du smartphone de l'adolescent et la tentative d'accès à un site de casino.
+    \item \textbf{Résultat attendu 2 :} L'appel à Mistral AI génère un rapport en langage naturel avec des suggestions proactives, telles que : \textit{"Suggestion : Bloquer l'accès aux réseaux sociaux entre 22h et 7h pour l'appareil Galaxy-A54."}
+\end{itemize}
+
+\subsection{Étape 5 — Télémétrie MQTT et Grafana}
+\begin{stepcadre}{Écoute en temps réel des événements réseau}
+\begin{lstlisting}[language=BashShell]
+docker exec gateway_mosquitto mosquitto_sub -t "guardian/#" -v
+\end{lstlisting}
+\end{stepcadre}
+En parallèle, le Dashboard Grafana accessible sur \texttt{http://localhost:3000} synthétise toutes ces données (Top sites visités, règles en vigueur, appareils en ligne).
+
+% ==============================
+% DÉPANNAGE
+% ==============================
+\section{Dépannage Rapide (Troubleshooting)}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{|l|l|X|}
+\hline
+\rowcolor{lightred!50}\textbf{Symptôme} & \textbf{Vérification} & \textbf{Solution} \\ \hline
+Services Pi inactifs & \texttt{systemctl status guardian-*} & \texttt{sudo systemctl start ...} \\ \hline
+Pas d'Internet client & \texttt{iptables -t nat -L POSTROUTING} & Vérifier NAT (MASQUERADE) \\ \hline
+Blocage inefficace & \texttt{iptables -L FORWARD -n} & Vérifier priorité règle DROP \\ \hline
+Erreur Mistral AI & \texttt{cat .env} & Vérifier la variable \texttt{MISTRAL\_API\_KEY} \\ \hline
+\end{tabularx}
+\end{center}
+
+\vspace{1cm}
+\begin{center}
+\textbf{\large --- Fin de la démonstration ---}
+\end{center}
+
+\end{document}

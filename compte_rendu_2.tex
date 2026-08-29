@@ -1,0 +1,422 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{geometry}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, urlcolor=blue, linkcolor=black, citecolor=black}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\setlength{\headheight}{14pt}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{booktabs}
+\usepackage{tcolorbox}
+\usepackage{fontawesome5}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, fit, backgrounds}
+
+% ==============================
+% MISE EN PAGE
+% ==============================
+\geometry{left=2.2cm, right=2.2cm, top=2.2cm, bottom=2.2cm}
+\setstretch{1.05}
+\setlist[itemize]{itemsep=2pt, topsep=2pt, parsep=0pt}
+
+% ==============================
+% COULEURS
+% ==============================
+\definecolor{codeblue}{rgb}{0.13,0.40,0.72}
+\definecolor{codegray}{rgb}{0.45,0.45,0.45}
+\definecolor{codegreen}{rgb}{0.10,0.55,0.10}
+\definecolor{codeorange}{rgb}{0.80,0.40,0.00}
+\definecolor{backgray}{rgb}{0.96,0.96,0.98}
+\definecolor{blueTN}{RGB}{0,75,150}
+\definecolor{lightblue}{RGB}{220,235,250}
+\definecolor{lightred}{RGB}{252,232,232}
+\definecolor{lightgreen}{RGB}{225,245,225}
+\definecolor{lightyellow}{RGB}{255,245,220}
+\definecolor{purpleTN}{RGB}{95,55,140}
+
+% ==============================
+% BOITES COLOREES
+% ==============================
+\tcbuselibrary{skins,breakable}
+
+\newtcolorbox{infocadre}{
+  colback=lightblue!60, colframe=blueTN, fonttitle=\bfseries,
+  arc=4pt, boxrule=0.8pt, left=6pt, right=6pt, top=4pt, bottom=4pt, breakable
+}
+\newtcolorbox{stepcadre}[1]{
+  colback=lightgreen!50, colframe=codegreen, fonttitle=\bfseries,
+  title={\faTerminal\ #1}, arc=3pt, boxrule=0.7pt,
+  left=6pt, right=6pt, top=3pt, bottom=3pt, breakable
+}
+\newtcolorbox{probcadre}[1]{
+  colback=lightred!60, colframe=red!60!black, fonttitle=\bfseries,
+  title={\faExclamationTriangle\ #1}, arc=3pt, boxrule=0.7pt,
+  left=6pt, right=6pt, top=3pt, bottom=3pt, breakable
+}
+\newtcolorbox{choixcadre}[1]{
+  colback=lightyellow!70, colframe=codeorange, fonttitle=\bfseries,
+  title={\faLightbulb\ #1}, arc=3pt, boxrule=0.7pt,
+  left=6pt, right=6pt, top=3pt, bottom=3pt, breakable
+}
+
+% ==============================
+% LISTINGS
+% ==============================
+\lstdefinelanguage{BashShell}{
+  keywords={sudo,apt,install,systemctl,docker,git,python3,pip,ssh,nano,cd,ls,cat,curl,sh,usermod,reboot,touch,umount,lsblk,ping,nmap,passwd,iw,ip,iptables,sysctl,mosquitto_sub, address},
+  keywordstyle=\color{codeblue}\bfseries, sensitive=true,
+  comment=[l]{\#}, commentstyle=\color{codegreen}\itshape,
+  stringstyle=\color{codeorange}, morestring=[b]",
+}
+\lstdefinelanguage{json}{
+  stringstyle=\color{codeorange},
+  string=[s]{"}{"},
+  comment=[l]{\:},
+  keywordstyle=\color{codeblue}\bfseries,
+}
+\lstset{
+  basicstyle=\scriptsize\ttfamily, keywordstyle=\color{codeblue}\bfseries,
+  commentstyle=\color{codegreen}\itshape, stringstyle=\color{codeorange},
+  numbers=none, backgroundcolor=\color{backgray}, frame=single,
+  rulecolor=\color{blueTN!30}, breaklines=true, breakatwhitespace=true,
+  tabsize=2, showstringspaces=false, xleftmargin=6pt, xrightmargin=4pt,
+  aboveskip=4pt, belowskip=3pt,
+}
+
+% ==============================
+% EN-TÊTES
+% ==============================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\bfseries\color{blueTN} AI Smart Parental Gateway}
+\fancyhead[R]{\small Stage — Juillet 2026}
+\fancyfoot[C]{\textcolor{blueTN}{\thepage}}
+\renewcommand{\headrulewidth}{0.6pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+% ==============================
+% TITRES
+% ==============================
+\titleformat{\section}
+  {\Large\bfseries\color{blueTN}}{\thesection}{0.6em}{}[\color{blueTN}\titlerule]
+\titlespacing*{\section}{0pt}{12pt}{5pt}
+\titleformat{\subsection}
+  {\large\bfseries\color{purpleTN}}{\thesubsection}{0.6em}{}
+\titlespacing*{\subsection}{0pt}{8pt}{3pt}
+
+\begin{document}
+
+% ==============================
+% PAGE DE GARDE
+% ==============================
+\thispagestyle{empty}
+\begin{titlepage}
+\begin{center}
+
+{%
+  \fontsize{9pt}{9pt}\selectfont
+  \begin{tabularx}{\textwidth}{@{}p{3.7cm}@{}p{8cm}@{}p{4cm}@{}}
+    \parbox{2.5cm}{\centering
+      % \includegraphics[width=4.5cm]{telnet.jpg}
+      [Image Telnet]
+    } &
+    \centering
+    \textbf{\scriptsize République Tunisienne} \\
+    \textbf{\scriptsize Ministère de l'Enseignement Supérieur} \\
+    \textbf{\scriptsize Université de Tunis El Manar} \\
+    \textbf{\scriptsize Institut Supérieur d'Informatique} &
+    \parbox{4.5cm}{\centering
+      % \includegraphics[width=4cm]{isi.png}
+      [Image ISI]
+    } \\
+  \end{tabularx}
+  \vspace{0.5cm}
+  \textcolor{blue}{\hrule height 2pt}
+  \vspace{1pt}
+  \textcolor{blue}{\hrule height 0.75pt}
+}
+
+\vspace{2.5cm}
+{\fontsize{22pt}{22pt}\selectfont\textbf{Compte Rendu N 2}}
+
+\vspace{0.5cm}
+{\fontsize{15pt}{15pt}\selectfont\textit{Réseaux, Systèmes Embarqués et Intelligence Artificielle}}
+
+\vspace{2cm}
+% --- Encadré projet ---
+\begin{tcolorbox}[
+  colback=lightblue!35, colframe=blueTN, arc=6pt, boxrule=1.2pt,
+  width=0.85\textwidth, halign=center, valign=center,
+  top=14pt, bottom=14pt, left=10pt, right=10pt
+]
+{\fontsize{18pt}{20pt}\selectfont\textbf{\faNetworkWired\ AI Smart Parental Gateway}}\\[8pt]
+{\large\textit{Règles, Automatisation, Dashboarding \& IA}}
+\end{tcolorbox}
+
+\vspace{2.5cm}
+\textbf{\textit{Réalisé par :}}\\[0.4cm]
+{\fontsize{16pt}{16pt}\selectfont\textbf{Rayen FEHRI}}
+
+
+\vspace{2cm}
+\textbf{Encadrante : Mme Zaineb KAMMOUN}\\[0.5cm]
+\textbf{Année Universitaire : 2025-2026}
+
+
+\end{center}
+\end{titlepage}
+\newpage
+
+\tableofcontents
+\thispagestyle{empty}
+\newpage
+
+% ==============================
+% INTRODUCTION
+% ==============================
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+
+Faisant suite au premier compte rendu qui validait la mise en place de la passerelle, la détection des équipements et l'analyse de leur trafic, ce deuxième rapport se concentre sur l'implémentation de la \textbf{Partie 3 du cahier des charges : le contrôle parental actif} ainsi que la \textbf{Partie 5 : l'Intelligence Artificielle}. 
+
+Nous aborderons la \textbf{fiabilisation de l'infrastructure}, l'automatisation du déploiement via \texttt{systemd}, la remontée d'informations en temps réel via \textbf{MQTT}, et l'implémentation d'une architecture IA hybride combinant \textbf{Machine Learning (Isolation Forest)} et \textbf{IA Générative (Mistral AI)} pour sécuriser et conseiller les parents.
+
+% ==============================
+% SECTION 1 : CONTROLE PARENTAL
+% ==============================
+\section{Moteur de Règles et Contrôle Parental}
+
+L'objectif est d'appliquer dynamiquement des politiques de restriction réseau. L'orchestrateur \texttt{main\_rules.py} synchronise l'état désiré (base de données) avec l'état réel (pare-feu et résolveur DNS).
+
+\subsection{Modèle de Données (PostgreSQL)}
+Une table dédiée centralise l'ensemble des règles de contrôle.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{|l|l|X|}
+\hline
+\rowcolor{lightblue}\multicolumn{3}{|c|}{\textbf{Table \texttt{rules} — Politiques de contrôle parental}} \\ \hline
+\rowcolor{lightblue!40}\textbf{Colonne} & \textbf{Type} & \textbf{Rôle} \\ \hline
+\texttt{id} & SERIAL (PK) & Identifiant unique de la règle \\ \hline
+\texttt{mac} & VARCHAR & Adresse MAC de l'appareil ciblé (NULL = tous les appareils) \\ \hline
+\texttt{rule\_type} & VARCHAR & Type d'action : \texttt{block\_device}, \texttt{schedule}, \texttt{block\_category} \\ \hline
+\texttt{target} & VARCHAR & Paramètre optionnel (ex: nom de la catégorie DNS "reseaux\_sociaux") \\ \hline
+\texttt{start\_time} & TIME & Heure de début d'application (pour \texttt{schedule}) \\ \hline
+\texttt{end\_time} & TIME & Heure de fin d'application (pour \texttt{schedule}) \\ \hline
+\texttt{active} & BOOLEAN & État d'activation de la règle (\texttt{TRUE}/\texttt{FALSE}) \\ \hline
+\end{tabularx}
+\end{center}
+
+\subsection{Architecture du Moteur de Synchronisation}
+
+\begin{center}
+\resizebox{0.95\textwidth}{!}{%
+\begin{tikzpicture}[
+  node distance=8mm and 12mm,
+  box/.style={draw, rounded corners=3pt, thick, minimum height=1.2cm, align=center, font=\small, inner sep=4pt},
+  storebox/.style={box, fill=lightgreen!60, draw=codegreen, minimum width=2.8cm},
+  procbox/.style={box, fill=lightyellow!80, draw=codeorange, minimum width=3.5cm},
+  actbox/.style={box, fill=lightblue!70, draw=blueTN, minimum width=3.2cm},
+  arrow/.style={-{Stealth[length=2.5mm]}, thick}
+]
+\node[storebox] (db) {\faDatabase\ PostgreSQL\\(Table \texttt{rules})};
+\node[procbox, right=of db] (engine) {\faCogs\ Moteur de règles\\(\texttt{main\_rules.py})};
+\node[actbox, right=of engine, yshift=1.4cm] (iptables) {\faShieldAlt\ iptables\\Blocage MAC \& Horaires};
+\node[actbox, right=of engine, yshift=-1.4cm] (dnsmasq) {\faGlobe\ dnsmasq\\Filtrage DNS Catégoriel};
+
+\draw[arrow] (db) -- (engine) node[midway, above, font=\scriptsize] {Lecture};
+\draw[arrow] (engine) |- (iptables) node[pos=0.75, above, font=\scriptsize] {Applique DROP};
+\draw[arrow] (engine) |- (dnsmasq) node[pos=0.75, below, font=\scriptsize] {Génère \texttt{.conf}};
+\end{tikzpicture}}
+\end{center}
+
+\subsection{Blocage Réseau (iptables)}
+L'interdiction d'accès à internet repose sur le blocage des trames au niveau de l'adresse MAC (couche 2), empêchant les contournements par changement d'IP (DHCP).
+
+\textbf{Mécanisme de synchronisation (\texttt{main\_rules.py}) :}
+\begin{itemize}
+    \item \textbf{Ciblage MAC :} Les règles visent la chaîne \texttt{FORWARD} (trafic traversant la passerelle \texttt{uap0 <-> wlan0}).
+    \item \textbf{Idempotence :} La commande \texttt{iptables -C} vérifie la présence de la règle avant toute insertion pour éviter les doublons.
+    \item \textbf{Priorité :} L'action \texttt{DROP} est insérée en tête de chaîne via \texttt{iptables -I}.
+    \item \textbf{Plages horaires (Schedules) :} Le moteur évalue en temps réel si l'heure actuelle appartient à la plage définie (\texttt{start\_time} à \texttt{end\_time}), gérant de manière transparente les créneaux chevauchant minuit (ex: 22h00 - 08h00).
+    \item \textbf{Nettoyage automatique :} Toute adresse MAC absente des règles actives (ou hors de sa plage horaire) est automatiquement purgée d'iptables (\texttt{iptables -D}).
+\end{itemize}
+
+\begin{stepcadre}{Exemple d'application d'une règle (Logs console)}
+\begin{lstlisting}[language=BashShell]
+2026-08-23 15:42:10 [INFO] Création des règles FORWARD ACCEPT (uap0 <-> wlan0)
+2026-08-23 15:42:12 [INFO] Synchronisation : BLOQUÉ a2:50:d5:8f:0b:04 (Règle #1)
+2026-08-23 15:52:12 [INFO] Synchronisation : DÉBLOQUÉ a2:50:d5:8f:0b:04 (règle supprimée/hors-plage)
+\end{lstlisting}
+\end{stepcadre}
+
+\subsection{Filtrage DNS Catégoriel (dnsmasq)}
+Plutôt qu'un blocage total, le module \texttt{dns\_blocker.py} permet des restrictions ciblées (Réseaux sociaux, Jeux, Adulte, etc.).
+
+\textbf{Processus de filtrage DNS :}
+\begin{itemize}
+    \item \textbf{Mappage JSON :} Le fichier \texttt{domain\_categories.json} associe des dizaines de domaines majeurs à leurs catégories respectives.
+    \item \textbf{Génération dynamique :} Les règles actives de type \texttt{block\_category} déclenchent la création du fichier \texttt{/etc/dnsmasq.d/guardian\_blocks.conf}.
+    \item \textbf{Poisoning DNS local :} Pour chaque domaine interdit, une directive \texttt{address=/domaine.com/0.0.0.0} est générée.
+    \item \textbf{Redémarrage intelligent :} Le service \texttt{dnsmasq} n'est rechargé (\texttt{systemctl restart dnsmasq}) que si le fichier de configuration a réellement changé (comparaison MD5/Hash), garantissant la stabilité du réseau.
+\end{itemize}
+
+\begin{stepcadre}{Extrait généré dans \texttt{/etc/dnsmasq.d/guardian\_blocks.conf}}
+\begin{lstlisting}[language=BashShell]
+# Catégories bloquées : reseaux_sociaux
+address=/tiktok.com/0.0.0.0
+address=/instagram.com/0.0.0.0
+address=/facebook.com/0.0.0.0
+address=/snapchat.com/0.0.0.0
+\end{lstlisting}
+\end{stepcadre}
+
+% ==============================
+% SECTION 2 : AUTOMATISATION
+% ==============================
+\section{Automatisation et Résilience (systemd)}
+
+Pour garantir une solution "Plug \& Play" (démarrage autonome sans intervention humaine), trois démons Linux ont été configurés via \texttt{systemd}.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{|l|l|X|}
+\hline
+\rowcolor{lightblue}\textbf{Service} & \textbf{Type} & \textbf{Rôle} \\ \hline
+\texttt{guardian-network} & \texttt{oneshot} & Crée l'interface \texttt{uap0}, active le routage IPv4 (\texttt{ip\_forward}) et configure le NAT (\texttt{MASQUERADE}). S'exécute une seule fois au boot. \\ \hline
+\texttt{guardian-discovery} & \texttt{simple} & Démon s'exécutant en arrière-plan qui analyse les nouveaux baux DHCP en continu et classifie les nouveaux appareils connectés. \\ \hline
+\texttt{guardian-rules} & \texttt{simple} & Démon qui synchronise périodiquement l'état d'iptables et dnsmasq avec les politiques enregistrées dans la base de données. \\ \hline
+\end{tabularx}
+\end{center}
+
+\begin{choixcadre}{Installation unifiée}
+Un script \texttt{install.sh} déploie la solution de bout en bout sur le Raspberry Pi :
+\begin{itemize}
+    \item Mise à jour système (\texttt{apt update}) et installation des dépendances (Docker, Python).
+    \item Configuration réseau bas niveau (\texttt{sysctl} pour le routage IPv4).
+    \item Création automatique, activation et démarrage des services \texttt{systemd}.
+\end{itemize}
+\end{choixcadre}
+
+% ==============================
+% SECTION 3 : TELEMETRIE ET DASHBOARD
+% ==============================
+\section{Télémétrie (MQTT) et Visualisation (Grafana)}
+
+\subsection{Broker MQTT (Mosquitto)}
+Le protocole léger MQTT (Mosquitto via Docker) assure la communication inter-processus en temps réel. Le wrapper Python \texttt{mqtt\_publisher.py} est utilisé transversalement par tous les modules.
+
+\textbf{Topics MQTT implémentés :}
+\begin{itemize}
+    \item \texttt{guardian/devices} : Publication immédiate lors de l'attribution d'un nouveau bail DHCP (détection MAC/IP).
+    \item \texttt{guardian/dns} : Flux temps réel des requêtes interceptées et classifiées.
+    \item \texttt{guardian/rules} : Notification lors de l'application ou la levée d'un blocage \texttt{iptables}.
+    \item \texttt{guardian/alerts} : Signalement d'anomalies par le moteur IA (Isolation Forest/Règles).
+\end{itemize}
+
+\begin{stepcadre}{Structure du JSON (Topic \texttt{guardian/devices})}
+\begin{lstlisting}[language=json]
+{
+  "mac": "f0:67:28:90:81:1d",
+  "ip": "192.168.50.52",
+  "hostname": "OPPO-A31",
+  "vendor": "OPPO",
+  "device_type": "Smartphone",
+  "confidence": 0.9,
+  "timestamp": "2026-08-23T15:42:10.123Z"
+}
+\end{lstlisting}
+\end{stepcadre}
+
+\subsection{Dashboard Grafana}
+L'outil Grafana (conteneurisé) est directement connecté à la base PostgreSQL pour offrir une supervision centralisée aux parents.
+
+\textbf{Vues principales du Dashboard :}
+\begin{itemize}
+    \item \textbf{Parc d'appareils :} Tableau dynamique des équipements connectés avec indicateur de présence (\texttt{last\_seen}).
+    \item \textbf{Activité DNS (Time-series) :} Graphiques d'évolution du volume de requêtes par catégorie, permettant d'identifier d'un coup d'œil les pics (ex: Netflix le soir).
+    \item \textbf{Audit des Politiques :} Panneau récapitulatif des règles actives (statut des blocages horaires et des filtres de catégories).
+\end{itemize}
+
+% ==============================
+% SECTION 4 : INTELLIGENCE ARTIFICIELLE
+% ==============================
+\section{Intelligence Artificielle et Rapports Proactifs}
+
+L'architecture IA retenue est \textbf{hybride} et se divise en deux parties complémentaires :
+
+\subsection{Détection d'Anomalies (Approche Hybride)}
+L'orchestrateur IA (\texttt{main\_ai.py}) analyse l'historique DNS en base de données selon deux approches :
+
+\textbf{1. Détecteurs Déterministes (Règles SQL) :}
+\begin{itemize}
+    \item \textbf{Usage nocturne :} Identifie les requêtes répétées entre 23h et 6h.
+    \item \textbf{Catégories suspectes :} Alerte lors d'un premier accès à un site pour adulte ou de paris en ligne.
+    \item \textbf{Pics d'activité :} Détecte une augmentation soudaine du volume de requêtes par rapport à la moyenne glissante (7 jours).
+    \item \textbf{Appareils inconnus :} Signale toute nouvelle adresse MAC non reconnue sur le réseau.
+\end{itemize}
+
+\textbf{2. Apprentissage Non Supervisé (Isolation Forest) :}
+\begin{itemize}
+    \item \textbf{Algorithme :} Modèle \textit{Isolation Forest} (via \texttt{scikit-learn}).
+    \item \textbf{Principe :} Apprend le profil "normal" de chaque appareil sans nécessiter de données labellisées (non supervisé).
+    \item \textbf{Extraction des caractéristiques (Features) :} Les données sont agrégées par fenêtres d'une heure. Les métriques extraites incluent :
+    \begin{itemize}
+        \item Le volume total de requêtes.
+        \item Le nombre de domaines uniques visités.
+        \item Le volume de trafic par catégorie (réseaux sociaux, jeux, streaming).
+        \item Le contexte temporel (heure de la journée, distinction jour de semaine / week-end).
+    \end{itemize}
+    \item \textbf{Avantage :} Détecte des déviations comportementales complexes invisibles pour les simples règles SQL.
+\end{itemize}
+
+\begin{probcadre}{Gestion du Bruit (Déduplication)}
+Pour éviter de saturer les parents d'alertes, chaque anomalie est soumise à une \textbf{règle de déduplication} : une anomalie de même nature pour un même appareil n'est enregistrée qu'une seule fois par fenêtre de 6 heures.
+\end{probcadre}
+
+\subsection{Génération de Rapports et Suggestions (Mistral AI)}
+Afin de rendre les données techniques intelligibles pour un parent, l'API LLM de \textbf{Mistral AI} a été intégrée (\texttt{report\_generator.py}).
+
+\textbf{Processus de génération :}
+\begin{enumerate}
+    \item \textbf{Agrégation des données :} Extraction d'un résumé de l'activité sur N jours (temps d'écran estimé, répartition des catégories par appareil, alertes de sécurité).
+    \item \textbf{Injection du Prompt :} Construction d'un contexte structuré envoyé au modèle linguistique (\texttt{mistral-small-latest}).
+    \item \textbf{Génération de la réponse :} Le modèle retourne un rapport formaté (Markdown, emojis) directement lisible par l'utilisateur final.
+\end{enumerate}
+
+\begin{choixcadre}{Fonctionnalité clé : Suggestions intelligentes de règles}
+Le rôle du LLM dépasse la simple synthèse. Il analyse les anomalies pour formuler des \textbf{suggestions proactives} de contrôle parental. 
+\begin{itemize}
+    \item \textit{Exemple d'entrée :} Le système remonte un pic nocturne sur les réseaux sociaux.
+    \item \textit{Exemple de sortie IA :} "Suggestion : Bloquer l'accès aux réseaux sociaux (TikTok, Instagram) entre 22h et 7h pour l'appareil \texttt{Galaxy-A54}."
+\end{itemize}
+\end{choixcadre}
+
+% ==============================
+% CONCLUSION
+% ==============================
+\section*{Conclusion et Perspectives}
+\addcontentsline{toc}{section}{Conclusion et Perspectives}
+
+Avec l'intégration de ce moteur de règles robuste, de l'infrastructure complète de monitoring (MQTT, Grafana, PostgreSQL, systemd) et du tout nouveau \textbf{module d'Intelligence Artificielle}, la \textbf{GuardianAI Gateway est désormais presque complète}. Elle intercepte le trafic, applique des politiques de filtrage intelligentes (blocages horaires, catégories) et conseille proactivement les parents grâce à l'analyse comportementale (Isolation Forest) et la génération de rapports en langage naturel (Mistral AI).
+
+\textbf{Évolutions futures (Partie 4) :}
+\begin{itemize}
+  \item \textbf{Interface Utilisateur Web :} Développement d'un Dashboard interactif moderne (React/Next.js). Cette interface permettra aux parents de configurer visuellement les règles de contrôle parental et de consulter les rapports générés par l'IA de manière ergonomique, évitant ainsi toute interaction directe avec le terminal.
+\end{itemize}
+
+\end{document}

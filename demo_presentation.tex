@@ -1,0 +1,227 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{geometry}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, urlcolor=blue, linkcolor=black, citecolor=black}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\setlength{\headheight}{14pt}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{booktabs}
+\usepackage{tcolorbox}
+\usepackage{fontawesome5}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, fit, backgrounds}
+
+% ==============================
+% MISE EN PAGE ET COULEURS
+% ==============================
+\geometry{left=2.2cm, right=2.2cm, top=2.2cm, bottom=2.2cm}
+\setstretch{1.05}
+\setlist[itemize]{itemsep=2pt, topsep=2pt, parsep=0pt}
+
+\definecolor{codeblue}{rgb}{0.13,0.40,0.72}
+\definecolor{codegreen}{rgb}{0.10,0.55,0.10}
+\definecolor{codeorange}{rgb}{0.80,0.40,0.00}
+\definecolor{backgray}{rgb}{0.96,0.96,0.98}
+\definecolor{blueTN}{RGB}{0,75,150}
+\definecolor{lightblue}{RGB}{220,235,250}
+\definecolor{lightgreen}{RGB}{225,245,225}
+\definecolor{lightyellow}{RGB}{255,245,220}
+
+\tcbuselibrary{skins,breakable}
+
+\newtcolorbox{infocadre}[1]{
+  colback=lightblue!60, colframe=blueTN, fonttitle=\bfseries,
+  title={\faInfoCircle\ #1}, arc=4pt, boxrule=0.8pt, left=6pt, right=6pt, top=4pt, bottom=4pt, breakable
+}
+\newtcolorbox{stepcadre}[1]{
+  colback=lightgreen!50, colframe=codegreen, fonttitle=\bfseries,
+  title={\faTerminal\ #1}, arc=3pt, boxrule=0.7pt,
+  left=6pt, right=6pt, top=3pt, bottom=3pt, breakable
+}
+
+\lstdefinelanguage{BashShell}{
+  keywords={python3, cd, source},
+  keywordstyle=\color{codeblue}\bfseries, sensitive=true,
+  comment=[l]{\#}, commentstyle=\color{codegreen}\itshape,
+  stringstyle=\color{codeorange}, morestring=[b]",
+}
+\lstset{
+  basicstyle=\scriptsize\ttfamily, keywordstyle=\color{codeblue}\bfseries,
+  commentstyle=\color{codegreen}\itshape, stringstyle=\color{codeorange},
+  numbers=none, backgroundcolor=\color{backgray}, frame=single,
+  rulecolor=\color{blueTN!30}, breaklines=true, breakatwhitespace=true,
+  tabsize=2, showstringspaces=false, xleftmargin=6pt, xrightmargin=4pt,
+  aboveskip=4pt, belowskip=3pt,
+}
+
+% ==============================
+% EN-TÊTES ET TITRES
+% ==============================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\bfseries\color{blueTN} AI Smart Parental Gateway}
+\fancyhead[R]{\small Guide de Démonstration}
+\fancyfoot[C]{\textcolor{blueTN}{\thepage}}
+\renewcommand{\headrulewidth}{0.6pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+\titleformat{\section}
+  {\Large\bfseries\color{blueTN}}{\thesection}{0.6em}{}[\color{blueTN}\titlerule]
+\titlespacing*{\section}{0pt}{12pt}{5pt}
+\titleformat{\subsection}
+  {\large\bfseries\color{codeblue}}{\thesubsection}{0.6em}{}
+
+\begin{document}
+
+% ==============================
+% PAGE DE GARDE
+% ==============================
+\thispagestyle{empty}
+\begin{center}
+\vspace*{3cm}
+\begin{tcolorbox}[
+  colback=lightblue!35, colframe=blueTN, arc=6pt, boxrule=1.2pt,
+  width=0.9\textwidth, halign=center, valign=center,
+  top=16pt, bottom=16pt, left=10pt, right=10pt
+]
+{\fontsize{22pt}{24pt}\selectfont\textbf{\faPlayCircle\ Guide de Démonstration}}\\[10pt]
+{\large\textit{Réseau, Moteur de Règles \& Intelligence Artificielle}}
+\end{tcolorbox}
+\vspace{1cm}
+{\Large\textbf{Projet : GuardianAI Gateway}}\\[0.5cm]
+{\large Présenté par : \textbf{Rayen FEHRI}}\\
+{\large Encadrante : \textbf{Mme Zaineb KAMMOUN}}
+\end{center}
+\vspace{2cm}
+
+% ==============================
+% INTRODUCTION
+% ==============================
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+
+Ce document sert de fil conducteur pour la démonstration technique du projet \textbf{GuardianAI Gateway}. Il relie les concepts théoriques développés (contrôle parental, Machine Learning, IA générative) à leur application directe en ligne de commande.
+
+L'objectif de cette démonstration est de prouver que le routeur intelligent est capable non seulement d'appliquer des règles de sécurité réseau strictes (via \texttt{iptables} et \texttt{dnsmasq}), mais aussi de surveiller activement le comportement des utilisateurs, d'apprendre leurs habitudes et de formuler des recommandations proactives.
+
+% ==============================
+% SECTION 1
+% ==============================
+\section{Préparation : Injection de Données Réalistes}
+
+Pour démontrer l'efficacité de notre Intelligence Artificielle, le système doit analyser un volume conséquent de trafic réseau. Au lieu de capturer des jours de trafic réel, nous utilisons un script de simulation.
+
+\subsection{Objectif Technique}
+Le script remplit la base de données PostgreSQL avec 7 jours d'historique réseau, couvrant trois profils distincts (Parents, Enfants, Adolescent) et injectant volontairement des "pièges" (connexion d'un appareil inconnu, accès à un site de paris, activité nocturne).
+
+\begin{stepcadre}{Commande d'Injection}
+\begin{lstlisting}[language=BashShell]
+cd ~/9raya/Projects/gateway_project
+source venv/bin/activate
+python3 inject_test_data.py
+\end{lstlisting}
+\end{stepcadre}
+
+\begin{center}
+\small
+\begin{tabularx}{0.9\textwidth}{|l|X|}
+\hline
+\rowcolor{lightblue}\textbf{Action effectuée en base} & \textbf{Résultat attendu} \\ \hline
+Nettoyage des tables & Remise à zéro complète (TRUNCATE) \\ \hline
+Création des équipements & Apparition de \texttt{PC-Parents}, \texttt{iPad-Enfants}, \texttt{Galaxy-A54} \\ \hline
+Historique DNS & Insertion de milliers de trames d'activité normale \\ \hline
+\rowcolor{lightred!50} Injection d'anomalies & Ajout de requêtes nocturnes et accès à \texttt{casino-en-ligne.com} \\ \hline
+\end{tabularx}
+\end{center}
+
+% ==============================
+% SECTION 2
+% ==============================
+\section{Exécution du Moteur IA (Détection \& Apprentissage)}
+
+Une fois les données en place, nous déclenchons l'orchestrateur IA. Ce module combine des requêtes SQL déterministes (pour les règles évidentes) et le modèle de Machine Learning \textbf{Isolation Forest} (pour les comportements plus subtils).
+
+\begin{stepcadre}{Lancement de l'Analyse IA}
+\begin{lstlisting}[language=BashShell]
+python3 main_ai.py
+\end{lstlisting}
+\end{stepcadre}
+
+\subsection{Analyse des Résultats de Détection}
+
+Lors de l'exécution, le terminal affiche plusieurs niveaux d'alertes classifiées par sévérité :
+
+\begin{itemize}
+    \item \textbf{\textcolor{red}{[CRITICAL]}} \textbf{Catégorie Suspecte :} Le moteur SQL détecte immédiatement le premier accès au site de paris en ligne par l'adolescent. C'est une violation flagrante des politiques de sécurité.
+    \item \textbf{\textcolor{codeorange}{[WARNING]}} \textbf{Usage Nocturne :} Une requête SQL met en évidence que le smartphone a généré 45 requêtes entre 2h et 3h du matin.
+    \item \textbf{\textcolor{blueTN}{[INFO]}} \textbf{Nouvel Appareil :} Détection d'une adresse MAC jamais vue sur le réseau.
+    \item \textbf{\textcolor{codegreen}{[Machine Learning]}} \textbf{Comportement Inhabituel :} Sans aucune règle explicite de notre part, l'algorithme \textit{Isolation Forest} a identifié des pics de jeux ou de streaming anormaux en se basant uniquement sur la déviation mathématique du comportement moyen de chaque appareil.
+\end{itemize}
+
+% ==============================
+% SECTION 3
+% ==============================
+\section{Validation de la Déduplication (Anti-Spam)}
+
+Un système de monitoring efficace ne doit pas inonder l'administrateur (ou le parent) de notifications répétitives.
+
+\begin{infocadre}{Mécanisme de Fenêtre Temporelle}
+Chaque anomalie détectée est comparée à l'historique récent. Si une anomalie identique (même appareil, même type d'incident) a été signalée il y a moins de 6 heures, elle est ignorée en silence.
+\end{infocadre}
+
+\begin{stepcadre}{Preuve du fonctionnement}
+\begin{lstlisting}[language=BashShell]
+# Relancer exactement la meme commande
+python3 main_ai.py
+
+# Résultat attendu : 0 nouvelle anomalie signalée.
+\end{lstlisting}
+\end{stepcadre}
+Cette étape démontre la maturité de l'orchestrateur et son adaptation à un usage domestique.
+
+% ==============================
+% SECTION 4
+% ==============================
+\section{Génération du Rapport via LLM (Mistral AI)}
+
+La détection technique est terminée. La dernière étape consiste à transformer ces alertes brutes en un compte-rendu exploitable par un parent. C'est ici qu'intervient l'API de \textbf{Mistral AI}.
+
+\begin{stepcadre}{Commande de Génération du Rapport Hebdomadaire}
+\begin{lstlisting}[language=BashShell]
+python3 main_ai.py --report --days 7
+\end{lstlisting}
+\end{stepcadre}
+
+Le script agrège les statistiques d'utilisation (temps d'écran par profil, top catégories) et les anomalies remontées à l'étape précédente. Il envoie ces données via un \textit{Prompt Structuré} à Mistral AI.
+
+\subsection{Ce qu'il faut observer dans le rapport généré}
+\begin{itemize}
+    \item \textbf{La Compréhension du Contexte :} Le LLM ne fait pas que recracher des données ; il comprend que l'appareil \texttt{Galaxy-A54} est un adolescent très actif sur les réseaux sociaux.
+    \item \textbf{La Mise en Forme :} Le rapport est formaté en Markdown avec une hiérarchisation claire et l'usage d'emojis pour rendre la lecture agréable.
+    \item \textbf{La Proactivité (Feature clé) :} Le rapport se termine toujours par une section \textit{"Suggestions de contrôle parental"}. Le LLM propose de lui-même de bloquer l'accès aux réseaux sociaux la nuit ou de limiter le temps de jeu, fournissant ainsi une recommandation concrète et applicable par le parent en un clic.
+\end{itemize}
+
+% ==============================
+% CONCLUSION
+% ==============================
+\section*{Conclusion de la Démonstration}
+\addcontentsline{toc}{section}{Conclusion}
+
+Cette séquence de démonstration prouve la fonctionnalité totale du \textbf{Backend} et de \textbf{l'Intelligence Artificielle} du projet GuardianAI Gateway. La prochaine et dernière étape du projet consistera à encapsuler cette puissance dans une \textbf{Interface Web} moderne, permettant aux parents de visualiser ces rapports et d'appliquer ces suggestions sans aucune ligne de commande.
+
+\end{document}
